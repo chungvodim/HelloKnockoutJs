@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+   <head>
+       <title>KnockoutJS How Dependency Tracking Works</title>
+         <!-- CDN's-->
+         <script src="http://ajax.aspnetcdn.com/ajax/knockout/knockout-3.1.0.js" type="text/javascript"></script>
+   </head>
+   <body>
+      <div>
+         <form data-bind="submit: addFruits">
+            <b>Add Fruits:</b>
+            <input data-bind='value: fruitToAdd, valueUpdate: "afterkeydown"'/>
+            <button type="submit" data-bind="enable: fruitToAdd().length > 0">Add</button>
+            <p><b>Your fruits list:</b></p>
+            <select multiple="multiple" width="50" data-bind="options: fruits"> </select>
+        </form>
+      </div>
+      <script>
+		/*
+         var Addfruit = function(fruits) {
+            this.fruits = ko.observableArray(fruits);
+            this.fruitToAdd = ko.observable("");
+            this.addFruits = function() {
+               if (this.fruitToAdd() != "") {
+                  this.fruits.push(this.fruitToAdd()); // Adds a fruit
+                  this.fruitToAdd(""); // Clears the text box
+                }
+            }.bind(this); // "this" is the view model
+         };
+		 */
+		 
+		 var Addfruit = function(fruits) {
+			self = this;
+            self.fruits = ko.observableArray(fruits);
+            self.fruitToAdd = ko.observable("");
+            self.addFruits = function() {
+               if (self.fruitToAdd() != "") {
+                  self.fruits.push(self.fruitToAdd()); // Adds a fruit
+                  self.fruitToAdd(""); // Clears the text box
+                }
+            }; // "this" is the view model
+         };
+
+         ko.applyBindings(new Addfruit(["Apple", "Orange", "Banana"]));
+      </script>
+   </body>
+</html>

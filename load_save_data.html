@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>KnockoutJS Computed Observables</title>
+    <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.0/themes/smoothness/jquery-ui.css">
+    <link rel="stylesheet" href="css/style.css">
+    <script src="http://ajax.aspnetcdn.com/ajax/knockout/knockout-3.4.0.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.0/jquery-ui.min.js"></script>
+</head>
+<body>
+
+    <h3>Tasks</h3>
+
+    <form data-bind="submit: addTask">
+        Add task: <input data-bind="value: newTaskText" placeholder="What needs to be done?" />
+        <button type="submit">Add</button>
+    </form>
+
+    <ul data-bind="foreach: tasks, visible: tasks().length > 0">
+        <li>
+            <input type="checkbox" data-bind="checked: isDone" />
+            <input data-bind="value: title, disable: isDone" />
+            <a href="#" data-bind="click: $parent.removeTask">Delete</a>
+        </li>
+    </ul>
+
+    You have <b data-bind="text: incompleteTasks().length">&nbsp;</b> incomplete task(s)
+    <span data-bind="visible: incompleteTasks().length == 0"> - it's beer time!</span>
+
+    <script>
+
+        function Task(data) {
+            this.title = ko.observable(data.title);
+            this.isDone = ko.observable(data.isDone);
+        }
+
+        //var sampleData = { new Task({ title: 'first' }), new Task({ title: 'second' }), new Task({ title: 'third' })};
+
+        function TaskListViewModel() {
+            // Data
+            var self = this;
+            self.tasks = ko.observableArray([]);
+            self.newTaskText = ko.observable();
+            self.incompleteTasks = ko.computed(function () {
+                return ko.utils.arrayFilter(self.tasks(), function (task) { return !task.isDone() });
+            });
+
+            // Operations
+            self.addTask = function () {
+                self.tasks.push(new Task({ title: this.newTaskText() }));
+                self.newTaskText("enter new task here");
+            };
+            self.removeTask = function (task) { self.tasks.remove(task) };
+
+            // Load initial state from server, convert it to Task instances, then populate self.tasks
+            $.getJSON("/tasks", function (allData) {
+                var mappedTasks = $.map(allData, function (item) { return new Task(item) });
+                self.tasks(mappedTasks);
+            });
+        }
+
+        ko.applyBindings(new TaskListViewModel());
+    </script>
+</body>
+</html>
